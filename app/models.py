@@ -1,7 +1,11 @@
 from app import db
+from app import login
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_passwoord_hash
+from flask_login import UserMixin
 
-class User(db.Model):
+
+class User(UserMixin, db.Model):
      """
      Represents one user (i.e., row) of a table of users in the database.
      """
@@ -22,6 +26,13 @@ class User(db.Model):
         """How objects of this class are printed."""
         return "<User %s>" % self.username
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
 class Post(db.Model):
     """
     Represents a post by a user to the blog.
@@ -34,3 +45,10 @@ class Post(db.Model):
     def __repr__(self):
         return "<Post %s>" % self.body
 
+@login.user_loader
+def load_user(id):
+    """
+    The `user_loader` function keeps track of users that have logged into the
+    application.
+    """
+    return User.query_get(int(id))
