@@ -29,7 +29,7 @@ def login():
     # If the user is already logged in and they attempt to navigate to the
     # login page, redirect them to `/index`. The `current_user` variable comes
     # from `flask_login`, representing the client of the request.
-    if current_user.is_autherticated:
+    if current_user.is_authenticated:
         return redirect(url_for("index"))
 
     # Create the form and check to see if the fields were filled out correctly.
