@@ -9,7 +9,7 @@ from app.models import User
 
 @app.route("/")
 @app.route("/index")
-@login.required
+@login_required
 def index():
     user = {"username": "Tyler"}
     posts = [
