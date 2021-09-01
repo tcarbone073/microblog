@@ -51,4 +51,5 @@ def load_user(id):
     The `user_loader` function keeps track of users that have logged into the
     application.
     """
-    return User.query_get(int(id))
+    return User.query.get(int(id))
+
