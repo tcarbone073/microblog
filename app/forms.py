@@ -1,3 +1,8 @@
+"""
+Stores all web form classes. Each form is passed to the appropriate web page
+via the page's view function in app/routes.py.
+"""
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo

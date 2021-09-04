@@ -1,3 +1,14 @@
+"""
+This module contains all of the different URLs that the application implements.
+Each URL page is handled with what is called a 'view' function.
+
+The basic operation of a view function is that when the web browser requests a
+URL, flask is going to call the corresponding view function, passing the return
+value back to the web browser. Each view function uses the `render_template`
+function to pass dynamic content to the template as keyword arguments. The
+Jinja2 template engine renders the content.
+"""
+
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
@@ -11,6 +22,9 @@ from app.models import User
 @app.route("/index")
 @login_required
 def index():
+    """
+    View function for `/index.html`.
+    """
     user = {"username": "Tyler"}
     posts = [
         {
