@@ -1,3 +1,9 @@
+"""
+This module contains classes that represent database tables. The ORM layer of
+the SQLAlchemy translates rows of the tables to objects created from these
+classes.
+"""
+
 from app import db
 from app import login
 from datetime import datetime
