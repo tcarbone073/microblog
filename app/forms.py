@@ -5,7 +5,7 @@ via the page's view function in app/routes.py.
 
 import flask_wtf
 import wtforms as wtf
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 
 from app.models import User
 
@@ -40,4 +40,10 @@ class RegistrationForm(flask_wtf.FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError("Email already taken.")
+
+
+class EditProfileForm(flask_wtf.FlaskForm):
+    username = wtf.StringField("Username", validators=[DataRequired()])
+    about_me = wtf.TextAreaField("About me", validators=[Length(min=0, max=140)])
+    submit = wtf.SubmitField("Submit")
 
