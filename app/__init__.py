@@ -10,6 +10,8 @@ Functions performed by this fie include:
  - Initializing database objects
  - Importing the `routes.py` module, which contains all of the website URLs
    (i.e., view functions)
+ - Configure settings for mail server, if one is set up
+ - Configure logging settings
 """
 
 from flask import Flask
@@ -18,7 +20,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 import logging
-from logging.handlers import SMTPHandler
+from logging.handlers import SMTPHandler, RotatingFileHandler
+import os
 
 
 # Initialize the application and load configuration settings from the
@@ -43,6 +46,8 @@ from app import routes, models, errors
 
 # Configurations for production
 if not app.debug:
+
+    # Configure mail server
     if app.config["MAIL_SERVER"]:
 
         auth = None
@@ -64,6 +69,26 @@ if not app.debug:
         
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
+
+    # Configure logging
+    if not os.path.exists("logs"):
+        os.mkdir("logs")
+
+    # The RotatingFileHandler class creates a new log file whenever the log
+    # file exceeds the `maxBytes` limit. Additionally, `backupCount` denotes
+    # how many log files are backed up.
+    file_handler = RotatingFileHandler("logs/microblog.log", maxBytes=10240,
+        backupCount=10)
+
+    # Set the format of the log messages
+    file_handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]"))
+    
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+
+    app.logger.setLevel(logging.INFO)
+    app.logger.info("Microblog")
 
 
 
