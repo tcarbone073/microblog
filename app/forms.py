@@ -27,7 +27,7 @@ class RegistrationForm(flask_wtf.FlaskForm):
         "Confirm Password", validators=[DataRequired(), EqualTo("password")])
     submit = wtf.SubmitField("Register")
 
-    # Any method matching the the patter `validate_<field_name>` will be
+    # Any method matching the the pattern `validate_<field_name>` will be
     # executed as a validation. There two methods check to see if the username
     # or email already exists in the user database, raising an exception if one
     # is found.
@@ -46,4 +46,15 @@ class EditProfileForm(flask_wtf.FlaskForm):
     username = wtf.StringField("Username", validators=[DataRequired()])
     about_me = wtf.TextAreaField("About me", validators=[Length(min=0, max=140)])
     submit = wtf.SubmitField("Submit")
+
+    def __init__(self, original_username, *args, **kwargs):
+        super(EditProfileForm, self).__init__(*args, **kwargs)
+        self.original_username = original_username
+
+    def validate_username(self, username):
+        if username.data != self.original_username:
+            user = User.query.filter_by(username=self.username.data).first()
+            if user is not None:
+                raise ValidationError("Please use a different username.")
+
 

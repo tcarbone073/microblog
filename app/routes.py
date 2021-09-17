@@ -124,7 +124,7 @@ def user(username):
 @app.route("/edit_profile", methods=["GET", "POST"])
 @login_required
 def edit_profile():
-    form = EditProfileForm()
+    form = EditProfileForm(current_user.username)
 
     # If the data is validated, copy into the user object and write to the
     # database.
