@@ -12,6 +12,15 @@ from flask_login import UserMixin
 import hashlib
 
 
+# This table is created outside of a model class, becuase it is an auxiliary
+# table that has no data other than foreign keys for other table entries (in
+# this case, user IDs)
+followers = db.Table("followers", 
+    db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("followed_id", db.Integer, db.ForeignKey("user.id"))
+)
+
+
 class User(UserMixin, db.Model):
     """
     Represents one user (i.e., row) of a table of users in the database.
@@ -31,6 +40,17 @@ class User(UserMixin, db.Model):
     # is... TBD.
     posts = db.relationship("Post", backref="author", lazy="dynamic")
 
+    # This defines a many-to-many relatioship for other uses that follow this
+    # user (i.e., linking `User` instances to other `User` instances).
+    followed = db.relationship(
+        "User",
+        secondary = followers,
+        primaryjoin = (followers.c.follower_id == id),
+        secondaryjoin = (followers.c.followed_id == id),
+        backref = db.backref("followers", lazy="dynamic"),
+        lazy="dynamic"
+    )
+
     def __repr__(self):
         """How objects of this class are printed."""
         return "<User %s>" % self.username
@@ -47,6 +67,41 @@ class User(UserMixin, db.Model):
 
         url = "https://www.gravatar.com/avatar/{}?d=identicon&s={}"
         return url.format(digest, size)
+
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+
+    def is_following(self, user):
+        return self.followed.filter(
+            followers.c.followed_id == user.id).count() > 0
+
+    def followed_posts(self):
+        """
+        Return a query of all posts by users that we are following, along with
+        our own posts, sorted by most recent date.
+        """
+        
+        # Here, we join the 'followers' table and the 'posts' table by matching
+        # the 'followed-by' user and the user the created the post. We filter
+        # the resultant table by only the posts created by users that we are
+        # following.
+        followed_posts =  Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)).filter(
+                followers.c.follower_id == self.id)
+
+        # Get all posts that we created
+        own_posts = Post.query.filter_by(user_id = self.id)
+
+        # Return the union of the two queries, sorted by the date that the post
+        # was created.
+        return followed_posts.union(own_posts).order_by(Post.timestamp.desc())
+
+
 
 
 class Post(db.Model):
@@ -68,4 +123,6 @@ def load_user(id):
     application.
     """
     return User.query.get(int(id))
+
+
 
