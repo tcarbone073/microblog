@@ -61,3 +61,8 @@ class EditProfileForm(flask_wtf.FlaskForm):
 class EmptyForm(flask_wtf.FlaskForm):
     submit = wtf.SubmitField("Submit")
 
+
+class PostForm(flask_wtf.FlaskForm):
+    post = wtf.TextAreaField("Say something", validators=[DataRequired(),
+        Length(min=1, max=140)])
+    submit = wtf.SubmitField("Submit")
