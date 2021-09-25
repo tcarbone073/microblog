@@ -37,6 +37,7 @@ def index():
     """
     View function for `/index.html`.
     """
+    # Create a post
     form = PostForm()
     if form.validate_on_submit():
         post = Post(body=form.post.data, author=current_user)
@@ -45,16 +46,9 @@ def index():
         flash("Your poas is now live!")
         return redirect(url_for("index"))
 
-    posts = [
-        {
-            "author": {"username": "John"},
-            "body": "Beautiful day in Portland!"
-        },
-        {
-            "author": {"username": "Susan"},
-            "body": "The avengers movie was so cool!"
-        }
-    ]
+    # Display posts of other users that we are following
+    posts = current_user.followed_posts().all()
+    
     return render_template("index.html", title="Home", form=form, posts=posts)
 
 
