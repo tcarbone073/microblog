@@ -154,7 +154,7 @@ def follow(username):
     form = EmptyForm()
     if form.validate_on_submit():
 
-        user = User.query.filter(username = username).first()
+        user = User.query.filter_by(username = username).first()
         if user is None:
             flash("User {} not found.".format(username))
             return redirect(url_for("index"))
@@ -165,7 +165,7 @@ def follow(username):
 
         current_user.follow(user)
         db.session.commit()
-        flash("You are following {}.".format(username))
+        flash("You are now following {}.".format(username))
         return redirect(url_for("user", username = username))
 
     else:
@@ -189,7 +189,7 @@ def unfollow(username):
             return redirect(url_for("user", username = username))
         current_user.unfollow(user)
         db.session.commit()
-        flash("ou are not following {}".format(username))
-        return rediect(url_for("user", username = username))
+        flash("You are now following {}.".format(username))
+        return redirect(url_for("user", username = username))
     else:
         return redirect(url_for("index"))

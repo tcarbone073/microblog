@@ -32,15 +32,15 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # This defines a 'one-to-many' relationship. The first argument represetns
+    # This defines a 'one-to-many' relationship. The first argument represents
     # the 'many' side of the relationship. The `backref` argument defines the
     # name of the field that will be added to the objects of the 'many' class
-    # that points back at the 'one' oobject (in this case, adding a
+    # that points back at the 'one' objects (in this case, adding a
     # `post.author` that returns the user, given a post). The `lazy` argument
     # is... TBD.
     posts = db.relationship("Post", backref="author", lazy="dynamic")
 
-    # This defines a many-to-many relatioship for other uses that follow this
+    # This defines a many-to-many relationship for other uses that follow this
     # user (i.e., linking `User` instances to other `User` instances).
     followed = db.relationship(
         "User",
@@ -90,7 +90,7 @@ class User(UserMixin, db.Model):
         # the 'followed-by' user and the user the created the post. We filter
         # the resultant table by only the posts created by users that we are
         # following.
-        followed_posts =  Post.query.join(
+        followed_posts = Post.query.join(
             followers, (followers.c.followed_id == Post.user_id)).filter(
                 followers.c.follower_id == self.id)
 
