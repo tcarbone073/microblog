@@ -58,3 +58,6 @@ class EditProfileForm(flask_wtf.FlaskForm):
                 raise ValidationError("Please use a different username.")
 
 
+class EmptyForm(flask_wtf.FlaskForm):
+    submit = wtf.SubmitField("Submit")
+
