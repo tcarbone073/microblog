@@ -32,8 +32,9 @@ The recommended way to start the application is using the `flask run` command. T
 # .flaskenv
 export FLASK_APP=microblog.py          # Name of application file
 export FLASK=[development|production]  # Toggle development or production mode (among others)
-export SERVER_NAME=x.x.x.x:p           # Set server:port. Default is localhost:5000. Use 0.0.0.0 to run on remote server. 
 ```
+If running on a remote server, use `flask run -h 0.0.0.0 -p xxxx`.
+
 In this case, `microblog.py` imports the `app` module, calling `app/__init__.py`. This file will create the application object; import configuration data from `config.py`; initialize database and migrations objects; initialize the login manager; setup the mail server and application logging; and import `routes.py`, `models.py`, and `errors.py`.
 
 ### Configuration Data
