@@ -44,7 +44,11 @@ Application configuration data is stored in `config.py`. For some configuration 
 All of the different URLs for the application are handled in `routes.py`. Each page is handled by a **view function**, which is mapped to a URL for the pages contained in `app/templates/`. When the client's browser requests a page, flask runs the corresponding view function for the page, passing any dynamic content to the template. The template is displayed using the **Jinja2** templating engine. Each template is primarily standard html, with the expected dynamic content from `routes.py` encapsulated in double curly braces. Control statements, such as for loops or inclusion statements (e.g., `import`, `#include`) are denoted by `{% %}` markers.
 
 ### Forms
-A web page often accepts input from a user in some format. Where input is required, **forms** are implemented. Forms are not only convenient building blocks, but also validate input and register succesful submission of data.
+A web page often accepts input from a user in some format. Where input is required, **forms** are implemented. Forms rely on the `WTForms` package and its associated lightweight flask warapper, `Flask_WTF`.
+   * The `Form` is the key building block of any web form
+   * Each `Form` contains several `Fields`, such as `IntegerField` or `StringField`
+   * Every `Field` has a `Widget`, which represents the actual rendered object
+   * `Fields` contain a list of `Validators`, such as `DataRequired()`
 
 ### Packages
 Simply put, there are a huge number of python packages that are required to build a flask application. Each package, its dependencies, and a brief description of the purpose of the package is provided here.
