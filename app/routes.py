@@ -195,3 +195,14 @@ def unfollow(username):
         return redirect(url_for("user", username = username))
     else:
         return redirect(url_for("index"))
+
+@app.route('/explore')
+@login_required
+def explore():
+    # SELECT * FROM post ORDER BY timestamp DESC
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+
+    # Use the same template as the main page of the application ('index.html'),
+    # but do not pass in the form argument when calling the template
+    return render_template('index.html', title='Explore', posts=posts)
+
