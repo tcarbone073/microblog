@@ -22,5 +22,13 @@
 		{% include '_post.html' %}
 	{% endfor %}
 
+	{# Navigation for newer and older posts #}
+	{% if prev_url %}
+		<a href='{{ prev_url}}'>Newer Posts</a>
+	{% endif %}
+	{% if next_url %}
+		<a href='{{ next_url}}'>Older Posts</a>
+	{% endif %}
+
 {% endblock %}
 

@@ -49,9 +49,21 @@ def index():
     # Display posts of other users that we are following
     posts = current_user.followed_posts().paginate(
         page, app.config['POSTS_PER_PAGE'], False)
+
+    # Establish URL for next page, if one exists
+    if posts.has_next:
+        next_url = url_for('index', page=posts.next_num)
+    else:
+        next_url = None
+
+    # Establish URL for previos page, if one exists
+    if posts.has_prev:
+        prev_url = url_for('index', page=posts.prev_num)
+    else:
+        prev_url = None
     
     return render_template("index.html", title="Home", form=form, 
-        posts=posts.items)
+        posts=posts.items, next_url=next_url, prev_url=prev_url)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -209,7 +221,20 @@ def explore():
     posts = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
 
+    # Establish URL for next page, if one exists
+    if posts.has_next:
+        next_url = url_for('explore', page=posts.next_num)
+    else:
+        next_url = None
+
+    # Establish URL for previos page, if one exists
+    if posts.has_prev:
+        prev_url = url_for('explore', page=posts.prev_num)
+    else:
+        prev_url = None
+
     # Use the same template as the main page of the app ('index.html'), but do
     # not pass in the form argument
-    return render_template('index.html', title='Explore', posts=posts.items)
+    return render_template('index.html', title='Explore', posts=posts.items,
+        next_url=next_url, prev_url=prev_url)
 
