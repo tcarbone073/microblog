@@ -34,9 +34,6 @@ def before_request():
 @app.route("/index", methods=["GET", "POST"])
 @login_required
 def index():
-    """
-    View function for `/index.html`.
-    """
     # Create a post
     form = PostForm()
     if form.validate_on_submit():
@@ -46,10 +43,15 @@ def index():
         flash("Your poas is now live!")
         return redirect(url_for("index"))
 
+    # Default to show page 1
+    page = request.args.get('page', 1, type=int)
+
     # Display posts of other users that we are following
-    posts = current_user.followed_posts().all()
+    posts = current_user.followed_posts().paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
     
-    return render_template("index.html", title="Home", form=form, posts=posts)
+    return render_template("index.html", title="Home", form=form, 
+        posts=posts.items)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -199,10 +201,15 @@ def unfollow(username):
 @app.route('/explore')
 @login_required
 def explore():
-    # SELECT * FROM post ORDER BY timestamp DESC
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
 
-    # Use the same template as the main page of the application ('index.html'),
-    # but do not pass in the form argument when calling the template
-    return render_template('index.html', title='Explore', posts=posts)
+    # Default to show page 1
+    page = request.args.get('page', 1, type=int)
+
+    # Get all posts by all users. Paginate accordingly.
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+
+    # Use the same template as the main page of the app ('index.html'), but do
+    # not pass in the form argument
+    return render_template('index.html', title='Explore', posts=posts.items)
 

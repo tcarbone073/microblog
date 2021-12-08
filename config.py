@@ -18,6 +18,8 @@ class Config(object):
     # Don't track changes to the database
     SQLALCHEMY_TRACK_MODIFICATIONS= False
 
+    POSTS_PER_PAGE = 3
+
     # Email server details
     MAIL_SERVER= os.environ.get("MAIL_SERVER")
     MAIL_PORT= int(os.environ.get("MAIL_PORT") or 25)
