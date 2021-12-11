@@ -4,12 +4,14 @@ the SQLAlchemy translates rows of the tables to objects created from these
 classes.
 """
 
-from app import db
-from app import login
-from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import hashlib
+from datetime import datetime
+from time import time
+import jwt
+
+from app import db, login, app
 
 
 # This table is created outside of a model class, becuase it is an auxiliary
@@ -100,6 +102,22 @@ class User(UserMixin, db.Model):
         # Return the union of the two queries, sorted by the date that the post
         # was created.
         return followed_posts.union(own_posts).order_by(Post.timestamp.desc())
+
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'],
+            algorithm='HS256'
+            )
+        
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'],
+                    algorithm=['HS256'])['reset_password']
+        except:
+            return
+        return User.query.get(id)
 
 
 
