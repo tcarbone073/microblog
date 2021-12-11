@@ -66,3 +66,8 @@ class PostForm(flask_wtf.FlaskForm):
     post = wtf.TextAreaField("Say something", validators=[DataRequired(),
         Length(min=1, max=140)])
     submit = wtf.SubmitField("Submit")
+
+
+class ResetPasswordForm(flask_wtf.FlaskForm):
+    email = wtf.StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')

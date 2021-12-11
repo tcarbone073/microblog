@@ -15,8 +15,9 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm
-from app.forms import PostForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm,\
+        PostForm, ResetPasswordForm
+from app.email import send_password_reset_email
 from app.models import User, Post
 
 
@@ -254,4 +255,28 @@ def explore():
     # not pass in the form argument
     return render_template('index.html', title='Explore', posts=posts.items,
         next_url=next_url, prev_url=prev_url)
+
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+
+    # If the user is logged in, no need to send password reset email.
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    form = ResetPasswordForm()
+
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        
+        if user:
+            send_password_reset_email(user)
+
+        # Flash this message even if the user is unkown. This is so clients
+        # cannot use this form to determine if a given user is a member or not.
+        flash('Check your email for the instruction to reset your password.')
+
+        return redirect(url_for('login'))
+
+    return render_template('reset_password_request.html', 
+        title='Reset Password', form=form)
 
