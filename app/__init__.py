@@ -15,6 +15,7 @@ Functions performed by this fie include:
 """
 
 from flask import Flask
+from flask_mail import Mail
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -28,6 +29,9 @@ import os
 # config.py located in the root of the application directory.
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# Create flask-mail object.
+mail = Mail(app)
 
 # Initialize the database object, as well as the another object representing
 # the database migration engine
