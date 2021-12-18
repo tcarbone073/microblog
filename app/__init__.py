@@ -16,6 +16,7 @@ Functions performed by this fie include:
 
 from flask import Flask
 from flask_mail import Mail
+from flask_bootstrap import Bootstrap
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -32,6 +33,9 @@ app.config.from_object(Config)
 
 # Create flask-mail object.
 mail = Mail(app)
+
+# Create flask-bootstrap object
+bootstrap = Bootstrap(app)
 
 # Initialize the database object, as well as the another object representing
 # the database migration engine
