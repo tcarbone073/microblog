@@ -1,1 +1,1 @@
-#1		Continue with implementing language translations (see b7f40bd)
+#1		Continue with implementing language translations (see 6d2d23d)
