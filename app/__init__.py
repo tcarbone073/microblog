@@ -14,16 +14,22 @@ Functions performed by this fie include:
  - Configure logging settings
 """
 
+# Flask and Flask extensions
 from flask import Flask
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
-from config import Config
+from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+
+# Builtins
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+
+# User-defined
+from config import Config
 
 
 # Initialize the application and load configuration settings from the
@@ -36,6 +42,9 @@ mail = Mail(app)
 
 # Create flask-bootstrap object
 bootstrap = Bootstrap(app)
+
+# Create flask-moment object
+moment = Moment(app)
 
 # Initialize the database object, as well as the another object representing
 # the database migration engine
