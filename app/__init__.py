@@ -19,6 +19,7 @@ from flask import Flask
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
+from flask_babel import Babel
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -46,6 +47,9 @@ bootstrap = Bootstrap(app)
 # Create flask-moment object
 moment = Moment(app)
 
+# Create flask-babel object
+babel = Babel(app)
+
 # Initialize the database object, as well as the another object representing
 # the database migration engine
 db = SQLAlchemy(app)
@@ -60,6 +64,12 @@ login.login_view = "login"
 # This is because the `routes` module imports the `app` variable defined above.
 # This avoids a circular import.
 from app import routes, models, errors
+
+# Select a language translation based on a best-match to the client's
+# `Accept-Languages` header.
+@babel.localeselector
+def get_local():
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 # Configurations for production
 if not app.debug:

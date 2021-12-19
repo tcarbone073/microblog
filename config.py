@@ -28,3 +28,4 @@ class Config(object):
     MAIL_PASSWORD= os.environ.get("MAIL_PASSWORD")
     ADMINS= ["your-email@example.com"]
 
+    LANGUAGES = ['en', 'es']
