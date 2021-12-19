@@ -9,11 +9,16 @@ function to pass dynamic content to the template as keyword arguments. The
 Jinja2 template engine renders the content.
 """
 
+# Flask and Flask extensions
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
+from flask_babel import _
 from werkzeug.urls import url_parse
+
+# Builtins
 from datetime import datetime
 
+# User-defined
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm,\
         PostForm, ResetPasswordRequestForm, ResetPasswordForm
@@ -41,7 +46,7 @@ def index():
         post = Post(body=form.post.data, author=current_user)
         db.session.add(post)
         db.session.commit()
-        flash("Your poas is now live!")
+        flash(_("Your post is now live!"))
         return redirect(url_for("index"))
 
     # Default to show page 1
@@ -190,7 +195,7 @@ def follow(username):
 
         user = User.query.filter_by(username = username).first()
         if user is None:
-            flash("User {} not found.".format(username))
+            flash(_('User %(username)s not found', username=username))
             return redirect(url_for("index"))
 
         if user == current_user:
@@ -215,7 +220,7 @@ def unfollow(username):
         user = User.query.filter_by(username = username).first()
 
         if user is None:
-            flash("User {} not found.".format(username))
+            flash(_('User %(username)s not found', username=username))
             return redirect(url_for("index"))
 
         if user == current_user:

@@ -20,6 +20,7 @@ from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_babel import Babel
+from flask_babel import lazy_gettext as _l
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -58,6 +59,10 @@ migrate = Migrate(app, db)
 # Initialize the flask login object
 login = LoginManager(app)
 login.login_view = "login"
+
+# Override the default login message with a version wrapped in the
+# lazy-processing function.
+login.login_message = _l('Please log in to access this page.')
 
 # The `models` module defines the structure of the database. Note here that we
 # are importing at the bottom of the file, and not the typical top of the file.
