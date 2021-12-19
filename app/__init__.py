@@ -16,6 +16,7 @@ Functions performed by this fie include:
 
 # Flask and Flask extensions
 from flask import Flask
+from flask import request
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
