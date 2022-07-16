@@ -3,34 +3,31 @@ Stores all web form classes. Each form is passed to the appropriate web page
 via the page's view function in app/routes.py.
 """
 
-# Flask and Flask extensions
-from flask_wtf import FlaskForm
 from flask_babel import lazy_gettext as _l
-from wtforms import StringField, PasswordField, BooleanField, SubmitField,\
-        TextAreaField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo,\
-        Length
+from flask_wtf import FlaskForm
+from wtforms import BooleanField, PasswordField, StringField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 
-# user-defined
 from app.models import User
 
 
 class LoginForm(FlaskForm):
-    username = StringField(_l('Username'), validators=[DataRequired()])
-    password = PasswordField(_l('Password'), validators=[DataRequired()])
-    remember_me = BooleanField(_l('Remember Me'))
-    submit = SubmitField(_l('Sign In'))
+    username = StringField(_l("Username"), validators=[DataRequired()])
+    password = PasswordField(_l("Password"), validators=[DataRequired()])
+    remember_me = BooleanField(_l("Remember Me"))
+    submit = SubmitField(_l("Sign In"))
 
 
 class RegistrationForm(FlaskForm):
     # Each field is required. For `email`, there is a further validation that
     # the email match the format of an email address.
-    username = StringField(_l('Username'), validators=[DataRequired()])
-    email = StringField(_l('Email'), validators=[DataRequired(), Email()])
-    password = PasswordField(_l('Password'), validators=[DataRequired()])
-    password2 = PasswordField(_l('Confirm Password'), 
-            validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField(_l('Register'))
+    username = StringField(_l("Username"), validators=[DataRequired()])
+    email = StringField(_l("Email"), validators=[DataRequired(), Email()])
+    password = PasswordField(_l("Password"), validators=[DataRequired()])
+    password2 = PasswordField(
+        _l("Confirm Password"), validators=[DataRequired(), EqualTo("password")]
+    )
+    submit = SubmitField(_l("Register"))
 
     # Any method matching the the pattern `validate_<field_name>` will be
     # executed as a validation. There two methods check to see if the username
@@ -39,12 +36,12 @@ class RegistrationForm(FlaskForm):
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
-            raise ValidationError('Username already taken.')
+            raise ValidationError("Username already taken.")
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
-            raise ValidationError('Email already taken.')
+            raise ValidationError("Email already taken.")
 
 
 class EditProfileForm(FlaskForm):
@@ -68,19 +65,20 @@ class EmptyForm(FlaskForm):
 
 
 class PostForm(FlaskForm):
-    post = TextAreaField("Say something", validators=[DataRequired(),
-        Length(min=1, max=140)])
+    post = TextAreaField(
+        "Say something", validators=[DataRequired(), Length(min=1, max=140)]
+    )
     submit = SubmitField("Submit")
 
 
 class ResetPasswordRequestForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    submit = SubmitField('Request Password Reset')
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Request Password Reset")
 
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('New Password', validators=[DataRequired()])
-    password2 = PasswordField('Repeat New Password', validators=[DataRequired(),
-        EqualTo('password')])
-    submit = SubmitField('Request Password Reset')
-
+    password = PasswordField("New Password", validators=[DataRequired()])
+    password2 = PasswordField(
+        "Repeat New Password", validators=[DataRequired(), EqualTo("password")]
+    )
+    submit = SubmitField("Request Password Reset")

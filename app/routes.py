@@ -9,21 +9,25 @@ function to pass dynamic content to the template as keyword arguments. The
 Jinja2 template engine renders the content.
 """
 
-# Flask and Flask extensions
-from flask import render_template, flash, redirect, url_for, request
-from flask_login import current_user, login_user, logout_user, login_required
-from flask_babel import _
-from werkzeug.urls import url_parse
-
-# Builtins
 from datetime import datetime
 
-# User-defined
+from flask import flash, redirect, render_template, request, url_for
+from flask_babel import _
+from flask_login import current_user, login_required, login_user, logout_user
+from werkzeug.urls import url_parse
+
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm,\
-        PostForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.email import send_password_reset_email
-from app.models import User, Post
+from app.forms import (
+    EditProfileForm,
+    EmptyForm,
+    LoginForm,
+    PostForm,
+    RegistrationForm,
+    ResetPasswordForm,
+    ResetPasswordRequestForm,
+)
+from app.models import Post, User
 
 
 @app.before_request
@@ -50,26 +54,33 @@ def index():
         return redirect(url_for("index"))
 
     # Default to show page 1
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get("page", 1, type=int)
 
     # Display posts of other users that we are following
     posts = current_user.followed_posts().paginate(
-        page, app.config['POSTS_PER_PAGE'], False)
+        page, app.config["POSTS_PER_PAGE"], False
+    )
 
     # Establish URL for next page, if one exists
     if posts.has_next:
-        next_url = url_for('index', page=posts.next_num)
+        next_url = url_for("index", page=posts.next_num)
     else:
         next_url = None
 
     # Establish URL for previos page, if one exists
     if posts.has_prev:
-        prev_url = url_for('index', page=posts.prev_num)
+        prev_url = url_for("index", page=posts.prev_num)
     else:
         prev_url = None
-    
-    return render_template("index.html", title="Home", form=form, 
-        posts=posts.items, next_url=next_url, prev_url=prev_url)
+
+    return render_template(
+        "index.html",
+        title="Home",
+        form=form,
+        posts=posts.items,
+        next_url=next_url,
+        prev_url=prev_url,
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -106,7 +117,7 @@ def login():
         if not next_page or url_parse(next_page).netloc != "":
             next_page = url_for("index")
         return redirect(next_page)
-        
+
     # Render the login page
     return render_template("login.html", title="Sign In", form=form)
 
@@ -139,27 +150,34 @@ def user(username):
 
     user = User.query.filter_by(username=username).first_or_404()
 
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get("page", 1, type=int)
 
     posts = user.posts.order_by(Post.timestamp.desc()).paginate(
-        page, app.config['POSTS_PER_PAGE'], False)
+        page, app.config["POSTS_PER_PAGE"], False
+    )
 
     # Establish URL for next page, if one exists
     if posts.has_next:
-        next_url = url_for('user', username=user.username, page=posts.next_num)
+        next_url = url_for("user", username=user.username, page=posts.next_num)
     else:
         next_url = None
 
     # Establish URL for previos page, if one exists
     if posts.has_prev:
-        prev_url = url_for('user', username=user.username, page=posts.prev_num)
+        prev_url = url_for("user", username=user.username, page=posts.prev_num)
     else:
         prev_url = None
 
     form = EmptyForm()
 
-    return render_template("user.html", user=user, posts=posts.items, 
-        next_url=next_url, prev_url=prev_url, form=form)
+    return render_template(
+        "user.html",
+        user=user,
+        posts=posts.items,
+        next_url=next_url,
+        prev_url=prev_url,
+        form=form,
+    )
 
 
 @app.route("/edit_profile", methods=["GET", "POST"])
@@ -193,19 +211,19 @@ def follow(username):
     form = EmptyForm()
     if form.validate_on_submit():
 
-        user = User.query.filter_by(username = username).first()
+        user = User.query.filter_by(username=username).first()
         if user is None:
-            flash(_('User %(username)s not found', username=username))
+            flash(_("User %(username)s not found", username=username))
             return redirect(url_for("index"))
 
         if user == current_user:
             flash("You cannot follow yourself.")
-            return redirect(url_for("user", username = username))
+            return redirect(url_for("user", username=username))
 
         current_user.follow(user)
         db.session.commit()
         flash("You are now following {}.".format(username))
-        return redirect(url_for("user", username = username))
+        return redirect(url_for("user", username=username))
 
     else:
         return redirect(url_for("index"))
@@ -217,92 +235,101 @@ def unfollow(username):
     form = EmptyForm()
     if form.validate_on_submit():
 
-        user = User.query.filter_by(username = username).first()
+        user = User.query.filter_by(username=username).first()
 
         if user is None:
-            flash(_('User %(username)s not found', username=username))
+            flash(_("User %(username)s not found", username=username))
             return redirect(url_for("index"))
 
         if user == current_user:
             flash("You cannot unfollow yourself.")
-            return redirect(url_for("user", username = username))
+            return redirect(url_for("user", username=username))
         current_user.unfollow(user)
         db.session.commit()
         flash("You are now following {}.".format(username))
-        return redirect(url_for("user", username = username))
+        return redirect(url_for("user", username=username))
     else:
         return redirect(url_for("index"))
 
-@app.route('/explore')
+
+@app.route("/explore")
 @login_required
 def explore():
 
     # Default to show page 1
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get("page", 1, type=int)
 
     # Get all posts by all users. Paginate accordingly.
     posts = Post.query.order_by(Post.timestamp.desc()).paginate(
-        page, app.config['POSTS_PER_PAGE'], False)
+        page, app.config["POSTS_PER_PAGE"], False
+    )
 
     # Establish URL for next page, if one exists
     if posts.has_next:
-        next_url = url_for('explore', page=posts.next_num)
+        next_url = url_for("explore", page=posts.next_num)
     else:
         next_url = None
 
     # Establish URL for previos page, if one exists
     if posts.has_prev:
-        prev_url = url_for('explore', page=posts.prev_num)
+        prev_url = url_for("explore", page=posts.prev_num)
     else:
         prev_url = None
 
     # Use the same template as the main page of the app ('index.html'), but do
     # not pass in the form argument
-    return render_template('index.html', title='Explore', posts=posts.items,
-        next_url=next_url, prev_url=prev_url)
+    return render_template(
+        "index.html",
+        title="Explore",
+        posts=posts.items,
+        next_url=next_url,
+        prev_url=prev_url,
+    )
 
-@app.route('/reset_password_request', methods=['GET', 'POST'])
+
+@app.route("/reset_password_request", methods=["GET", "POST"])
 def reset_password_request():
 
     # If the user is logged in, no need to send password reset email.
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for("index"))
 
     form = ResetPasswordRequestForm()
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        
+
         if user:
             send_password_reset_email(user)
 
         # Flash this message even if the user is unkown. This is so clients
         # cannot use this form to determine if a given user is a member or not.
-        flash('Check your email for the instruction to reset your password.')
+        flash("Check your email for the instruction to reset your password.")
 
-        return redirect(url_for('login'))
+        return redirect(url_for("login"))
 
-    return render_template('reset_password_request.html', 
-        title='Reset Password', form=form)
+    return render_template(
+        "reset_password_request.html", title="Reset Password", form=form
+    )
 
-@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
 def reset_password(token):
 
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for("index"))
 
     user = User.verify_reset_password_token(token)
 
     if not user:
-        return redirect(url_for('index'))
+        return redirect(url_for("index"))
 
     form = ResetPasswordForm()
-    
+
     if form.validate_on_submit():
         user.set_password(form.password.data)
         db.session.commit()
-        flash('Your password has been reset.')
-        return redirect(url_for('login'))
+        flash("Your password has been reset.")
+        return redirect(url_for("login"))
 
-    return render_template('reset_password.html', form=form)
-
+    return render_template("reset_password.html", form=form)

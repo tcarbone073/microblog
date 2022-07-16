@@ -4,22 +4,23 @@ the SQLAlchemy translates rows of the tables to objects created from these
 classes.
 """
 
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
 import hashlib
 from datetime import datetime
 from time import time
+
 import jwt
+from flask_login import UserMixin
+from werkzeug.security import check_password_hash, generate_password_hash
 
-from app import db, login, app
-
+from app import app, db, login
 
 # This table is created outside of a model class, becuase it is an auxiliary
 # table that has no data other than foreign keys for other table entries (in
 # this case, user IDs)
-followers = db.Table("followers", 
+followers = db.Table(
+    "followers",
     db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
-    db.Column("followed_id", db.Integer, db.ForeignKey("user.id"))
+    db.Column("followed_id", db.Integer, db.ForeignKey("user.id")),
 )
 
 
@@ -27,6 +28,7 @@ class User(UserMixin, db.Model):
     """
     Represents one user (i.e., row) of a table of users in the database.
     """
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -46,11 +48,11 @@ class User(UserMixin, db.Model):
     # user (i.e., linking `User` instances to other `User` instances).
     followed = db.relationship(
         "User",
-        secondary = followers,
-        primaryjoin = (followers.c.follower_id == id),
-        secondaryjoin = (followers.c.followed_id == id),
-        backref = db.backref("followers", lazy="dynamic"),
-        lazy="dynamic"
+        secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref("followers", lazy="dynamic"),
+        lazy="dynamic",
     )
 
     def __repr__(self):
@@ -79,25 +81,24 @@ class User(UserMixin, db.Model):
             self.followed.remove(user)
 
     def is_following(self, user):
-        return self.followed.filter(
-            followers.c.followed_id == user.id).count() > 0
+        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
     def followed_posts(self):
         """
         Return a query of all posts by users that we are following, along with
         our own posts, sorted by most recent date.
         """
-        
+
         # Here, we join the 'followers' table and the 'posts' table by matching
         # the 'followed-by' user and the user the created the post. We filter
         # the resultant table by only the posts created by users that we are
         # following.
         followed_posts = Post.query.join(
-            followers, (followers.c.followed_id == Post.user_id)).filter(
-                followers.c.follower_id == self.id)
+            followers, (followers.c.followed_id == Post.user_id)
+        ).filter(followers.c.follower_id == self.id)
 
         # Get all posts that we created
-        own_posts = Post.query.filter_by(user_id = self.id)
+        own_posts = Post.query.filter_by(user_id=self.id)
 
         # Return the union of the two queries, sorted by the date that the post
         # was created.
@@ -105,37 +106,35 @@ class User(UserMixin, db.Model):
 
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
-            {
-                'reset_password': self.id, 
-                'exp': time() + expires_in
-            },
-            app.config['SECRET_KEY'],
-            algorithm='HS256'
-            )
-        
+            {"reset_password": self.id, "exp": time() + expires_in},
+            app.config["SECRET_KEY"],
+            algorithm="HS256",
+        )
+
     @staticmethod
     def verify_reset_password_token(token):
         try:
-            id = jwt.decode(token, app.config['SECRET_KEY'],
-                    algorithms=['HS256'])['reset_password']
+            id = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])[
+                "reset_password"
+            ]
         except:
             return
         return User.query.get(id)
-
-
 
 
 class Post(db.Model):
     """
     Represents a post by a user to the blog.
     """
+
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
     def __repr__(self):
         return "<Post %s>" % self.body
+
 
 @login.user_loader
 def load_user(id):
@@ -144,5 +143,3 @@ def load_user(id):
     application.
     """
     return User.query.get(int(id))
-
-
